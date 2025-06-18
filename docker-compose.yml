@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  auto-committer:
+    build: .
+    volumes:
+      - ./:/app
+      - ${REPO_PATH:-.}:/app/repo
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - EMAIL_USER=${EMAIL_USER:-}
+      - EMAIL_PASSWORD=${EMAIL_PASSWORD:-}
+      - WEBHOOK_URL=${WEBHOOK_URL:-}
+    restart: always
+    command: python auto_committer.py 

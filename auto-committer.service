@@ -1,0 +1,17 @@
+[Unit]
+Description=Enhanced Auto Git Committer
+After=network.target
+
+[Service]
+Type=simple
+User=developer
+WorkingDirectory=/path/to/auto-committer
+ExecStart=/path/to/venv/bin/python auto_committer.py
+Restart=always
+RestartSec=10
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=auto-committer
+
+[Install]
+WantedBy=multi-user.target 

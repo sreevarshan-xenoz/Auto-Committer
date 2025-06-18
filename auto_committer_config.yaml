@@ -1,0 +1,66 @@
+repository:
+  path: "."  # Current directory by default
+  branch: "main"
+  remote: "origin"
+
+scheduling:
+  enabled: true
+  interval_minutes: 30
+  max_commits_per_hour: 6
+  quiet_hours:
+    start: "22:00"
+    end: "08:00"
+
+file_monitoring:
+  enabled: false
+  debounce_seconds: 5
+  ignore_patterns:
+    - "*.log"
+    - "*.tmp" 
+    - ".DS_Store"
+    - "node_modules/*"
+    - "__pycache__/*"
+    - ".git/*"
+    - "auto_committer.log"
+
+commit_behavior:
+  min_files_for_commit: 1
+  max_files_per_commit: 50
+  require_meaningful_changes: true
+  skip_whitespace_only: true
+
+ai_integration:
+  enabled: false
+  model: "gpt-3.5-turbo"
+  fallback_to_template: true
+  max_retries: 3
+
+security:
+  scan_for_secrets: true
+  blocked_extensions:
+    - ".env"
+    - ".key" 
+    - ".pem"
+    - ".p12"
+    - ".pfx"
+    - ".crt"
+  secret_patterns:
+    - "password\\s*=\\s*['\"][^'\"]+['\"]"
+    - "api[_-]?key\\s*=\\s*['\"][^'\"]+['\"]"
+    - "secret\\s*=\\s*['\"][^'\"]+['\"]"
+    - "token\\s*=\\s*['\"][^'\"]+['\"]"
+    - "-----BEGIN [A-Z ]+-----"
+
+notifications:
+  webhook:
+    enabled: false
+    url: ""
+  email:
+    enabled: false
+    smtp_server: "smtp.gmail.com"
+    recipients: []
+
+logging:
+  level: "INFO"
+  file_path: "auto_committer.log"
+  max_file_size_mb: 10 
