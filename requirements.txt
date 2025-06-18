@@ -1,0 +1,11 @@
+# Essential Dependencies
+GitPython>=3.1.0      # High-level Git operations
+schedule>=1.2.0       # Simple cron-like scheduling
+watchdog>=2.1.0       # Real-time file system monitoring
+PyYAML>=6.0          # Configuration file management
+python-dotenv>=0.19.0 # Environment variable management
+
+# Optional Advanced Features
+openai>=1.0.0        # AI-powered commit messages
+requests>=2.28.0     # Webhook notifications
+aiohttp>=3.8.0       # Async HTTP for webhooks 
