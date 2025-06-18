@@ -63,4 +63,17 @@ notifications:
 logging:
   level: "INFO"
   file_path: "auto_committer.log"
-  max_file_size_mb: 10 
+  max_file_size_mb: 10
+
+plugins:
+  enabled:
+    - smart_commit_message
+    # - code_quality_notes
+    # - diff_viewer
+    # - bug_risk_score
+    # - file_prioritization
+    # - commit_karma
+    # - mobile_integration
+    # - git_visualizer
+    # - intention_aware
+    # - branch_management 
