@@ -8,15 +8,16 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
 
 setup(
     name="enhanced-auto-committer",
-    version="1.0.0",
-    author="Your Name",
-    author_email="your.email@example.com",
+    version="0.1.0-alpha",
+    author="sreevarshan-xenoz",
+    author_email="sreevarshan1511@gmail.com",
     description="An enhanced auto-committer for Git repositories",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/yourusername/enhanced-auto-committer",
+    url="https://github.com/sreevarshan-xenoz/Auto-Committer",
     packages=find_packages(),
     classifiers=[
+        "Development Status :: 3 - Alpha",
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
