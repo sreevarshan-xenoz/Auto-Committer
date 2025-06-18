@@ -12,6 +12,8 @@ from git import Repo, GitCommandError
 import schedule
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
+import importlib
+import pkgutil
 
 class AutoCommitterError(Exception):
     """Custom exception for auto-committer specific errors"""
@@ -198,6 +200,7 @@ class EnhancedAutoCommitter:
         load_dotenv()
         self.config = self._load_config(config_path)
         self._setup_logging()
+        self.plugins = []
         self._initialize_components()
         
     def _load_config(self, config_path: str) -> Dict:
@@ -226,6 +229,22 @@ class EnhancedAutoCommitter:
         )
         self.logger = logging.getLogger(__name__)
     
+    def _load_plugins(self):
+        """Auto-discover and load enabled plugins from plugins/ directory."""
+        enabled_plugins = set(self.config.get('plugins', {}).get('enabled', []))
+        plugin_dir = os.path.join(os.path.dirname(__file__), 'plugins')
+        for finder, name, ispkg in pkgutil.iter_modules([plugin_dir]):
+            if name in enabled_plugins:
+                try:
+                    module = importlib.import_module(f'plugins.{name}')
+                    for attr in dir(module):
+                        obj = getattr(module, attr)
+                        if isinstance(obj, type) and hasattr(obj, 'pre_commit'):
+                            self.plugins.append(obj(self.config))
+                            self.logger.info(f"Loaded plugin: {name}")
+                except Exception as e:
+                    self.logger.error(f"Failed to load plugin {name}: {e}")
+    
     def _initialize_components(self):
         """Initialize all system components"""
         repo_path = self.config['repository']['path']
@@ -251,6 +270,8 @@ class EnhancedAutoCommitter:
             self._setup_file_monitoring()
         
         self.running = False
+        self.plugins = []
+        self._load_plugins()
     
     def _setup_file_monitoring(self):
         """Setup real-time file monitoring"""
@@ -358,9 +379,23 @@ class EnhancedAutoCommitter:
             except:
                 commit_message = f"auto: update {len(changed_files)} files 🚀"
             
+            # PLUGIN HOOK: pre_commit
+            for plugin in self.plugins:
+                try:
+                    plugin.pre_commit(self.repo, changed_files)
+                except Exception as e:
+                    self.logger.error(f"Plugin {plugin.__class__.__name__} pre_commit error: {e}")
+            
             # Create commit
             commit = self.repo.index.commit(commit_message)
             self.logger.info(f"Created commit: {commit.hexsha[:8]} - {commit_message}")
+            
+            # PLUGIN HOOK: post_commit
+            for plugin in self.plugins:
+                try:
+                    plugin.post_commit(self.repo, commit)
+                except Exception as e:
+                    self.logger.error(f"Plugin {plugin.__class__.__name__} post_commit error: {e}")
             
             # Push to remote
             try:
@@ -379,6 +414,13 @@ class EnhancedAutoCommitter:
                 origin.push(branch_name)
                 self.logger.info("✅ Successfully pushed to remote")
                 
+                # PLUGIN HOOK: on_push
+                for plugin in self.plugins:
+                    try:
+                        plugin.on_push(self.repo, commit)
+                    except Exception as e:
+                        self.logger.error(f"Plugin {plugin.__class__.__name__} on_push error: {e}")
+                
                 return True
                 
             except GitCommandError as e:
@@ -388,6 +430,12 @@ class EnhancedAutoCommitter:
             
         except Exception as e:
             self.logger.error(f"Commit attempt failed: {e}", exc_info=True)
+            # PLUGIN HOOK: on_error
+            for plugin in getattr(self, 'plugins', []):
+                try:
+                    plugin.on_error(e)
+                except Exception as ex:
+                    self.logger.error(f"Plugin {plugin.__class__.__name__} on_error error: {ex}")
             return False
     
     def start(self):
